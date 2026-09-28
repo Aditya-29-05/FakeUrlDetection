@@ -1,0 +1,237 @@
+/* ── Cyber Animation Styles ───────────────────────────────────────────── */
+
+/* Animated Cyber Grid (Background layer) */
+.cyber-grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, rgba(59, 130, 246, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(59, 130, 246, 0.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at 50% 30%, black 40%, transparent 85%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, black 40%, transparent 85%);
+  z-index: 0;
+  animation: gridShift 40s linear infinite;
+}
+
+@keyframes gridShift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+/* Background Canvas positioning */
+.cyber-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure foreground content stacks cleanly above canvas */
+.header, .main, .footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HUD Scan Animation Component ─────────────────────────────────────── */
+.scan-hud-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  background: linear-gradient(180deg, rgba(15, 22, 40, 0.95), rgba(21, 29, 53, 0.95)) !important;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.2), inset 0 0 20px rgba(59, 130, 246, 0.08) !important;
+  animation: hudPulse 2.5s ease-in-out infinite alternate;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes hudPulse {
+  0% {
+    border-color: rgba(59, 130, 246, 0.35);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.15);
+  }
+  100% {
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.28);
+  }
+}
+
+/* Laser scanline sweeping across the card */
+.scan-laser-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, transparent);
+  box-shadow: 0 0 14px #38bdf8, 0 0 30px #818cf8;
+  animation: laserScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes laserScan {
+  0% {
+    top: 0%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.2;
+  }
+}
+
+/* Radar scanner circle */
+.radar-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-top-color: #38bdf8;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: radarSpin 1.4s linear infinite;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+}
+
+.radar-ring::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+}
+
+@keyframes radarSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hud-body {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.hud-details {
+  flex: 1;
+}
+
+.hud-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hud-status-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hud-target-url {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.4rem;
+}
+
+/* ── Result Reveal Animations ─────────────────────────────────────────── */
+.result-card-animated {
+  animation: resultReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes resultReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Animated threat level border pulse */
+.result-card-animated.safe {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.12);
+}
+
+.result-card-animated.phish {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 35px rgba(239, 68, 68, 0.18);
+}
+
+/* Staggered entry for feature chips */
+.feature-item-animated {
+  animation: featureFadeIn 0.3s ease forwards;
+  opacity: 0;
+}
+
+@keyframes featureFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Smooth Card Hover Interactions */
+.card {
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+  border-color: var(--border-bright);
+}
+
+/* Subtle glow for interactive focus */
+.url-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+/* ── Accessibility: Reduced Motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .cyber-grid-overlay,
+  .scan-laser-line,
+  .radar-ring {
+    animation: none !important;
+  }
+
+  .cyber-canvas {
+    opacity: 0.4;
+  }
+}

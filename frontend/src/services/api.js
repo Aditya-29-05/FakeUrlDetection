@@ -12,7 +12,9 @@ async function handleResponse(res) {
     try {
       const body = await res.json();
       message = body.detail || body.error || message;
-    } catch (_) {}
+    } catch {
+      // Ignore JSON parse failure and fallback to HTTP status
+    }
     throw new Error(message);
   }
   return res.json();

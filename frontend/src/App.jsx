@@ -3,21 +3,39 @@ import Header from './components/Header.jsx';
 import UrlForm from './components/UrlForm.jsx';
 import ResultCard from './components/ResultCard.jsx';
 import ScanHistory from './components/ScanHistory.jsx';
+import CyberNetworkBackground from './components/CyberNetworkBackground.jsx';
+import ScanAnimation from './components/ScanAnimation.jsx';
 import './index.css';
+import './styles/animations.css';
 
 export default function App() {
   const [result, setResult] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('idle'); // 'idle' | 'analyzing' | 'success' | 'error'
+  const [scanningUrl, setScanningUrl] = useState('');
   const [historyRefresh, setHistoryRefresh] = useState(0);
+
+  const handleLoading = (loading, url = '') => {
+    if (loading) {
+      setStatus('analyzing');
+      setScanningUrl(url);
+    } else {
+      // If finished and no result yet, fallback to idle unless success set it
+      setStatus((current) => (current === 'analyzing' ? 'idle' : current));
+    }
+  };
 
   const handleResult = (data) => {
     setResult(data);
+    setStatus('success');
     // Trigger history panel refresh
     setHistoryRefresh((n) => n + 1);
   };
 
   return (
     <>
+      {/* Animated Cybersecurity Network Framework */}
+      <CyberNetworkBackground />
+
       <Header />
 
       <main className="main">
@@ -35,9 +53,12 @@ export default function App() {
           </div>
 
           {/* URL input */}
-          <UrlForm onResult={handleResult} onLoading={setIsLoading} />
+          <UrlForm onResult={handleResult} onLoading={handleLoading} />
 
-          {/* Result */}
+          {/* Real-time HUD scan animation during active API call */}
+          {status === 'analyzing' && <ScanAnimation targetUrl={scanningUrl} />}
+
+          {/* Result Card with smooth entrance and animated confidence */}
           {result && <ResultCard result={result} />}
 
           {/* Scan history */}

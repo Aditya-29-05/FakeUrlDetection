@@ -1,10 +1,43 @@
+import { useState, useEffect } from 'react';
+
 export default function ResultCard({ result }) {
+  const targetPct = result ? Math.round(result.confidence * 100) : 0;
+  const targetPhishPct = result ? Math.round(result.phishing_probability * 100) : 0;
+
+  // Smooth numeric counter animation for real backend value
+  const [animatedPct, setAnimatedPct] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+      ? targetPct
+      : 0
+  );
+
+  useEffect(() => {
+    if (!result) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+
+    const duration = 600;
+    const startTime = performance.now();
+
+    const step = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimatedPct(Math.round(eased * targetPct));
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    const frameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frameId);
+  }, [result, targetPct]);
+
   if (!result) return null;
 
   const isSafe = result.prediction === 'SAFE';
   const cls = isSafe ? 'safe' : 'phish';
-  const pct = Math.round(result.confidence * 100);
-  const phishPct = Math.round(result.phishing_probability * 100);
 
   // Separate binary flags from numeric features
   const entries = Object.entries(result.features || {});
@@ -15,7 +48,7 @@ export default function ResultCard({ result }) {
     name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <div className="card result-card">
+    <div className={`card result-card result-card-animated ${cls}`}>
       {/* ── Header ── */}
       <div className="result-header">
         <div className={`result-badge ${cls}`}>
@@ -39,17 +72,17 @@ export default function ResultCard({ result }) {
       <div className="confidence-section">
         <div className="confidence-label">
           <span>Prediction confidence</span>
-          <strong>{pct}%</strong>
+          <strong>{animatedPct}%</strong>
         </div>
         <div className="confidence-track">
           <div
             className={`confidence-fill ${cls}`}
-            style={{ width: `${pct}%` }}
+            style={{ width: `${animatedPct}%` }}
           />
         </div>
         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1.5rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-          <span>✅ Safe: <strong style={{ color: 'var(--safe)' }}>{100 - phishPct}%</strong></span>
-          <span>🚨 Phishing: <strong style={{ color: 'var(--phish)' }}>{phishPct}%</strong></span>
+          <span>✅ Safe: <strong style={{ color: 'var(--safe)' }}>{100 - targetPhishPct}%</strong></span>
+          <span>🚨 Phishing: <strong style={{ color: 'var(--phish)' }}>{targetPhishPct}%</strong></span>
         </div>
       </div>
 
@@ -57,8 +90,12 @@ export default function ResultCard({ result }) {
       <div className="features-section">
         <h3>Feature Breakdown ({entries.length} features)</h3>
         <div className="features-grid">
-          {numericFeatures.map(([name, value]) => (
-            <div key={name} className="feature-item">
+          {numericFeatures.map(([name, value], idx) => (
+            <div
+              key={name}
+              className="feature-item feature-item-animated"
+              style={{ animationDelay: `${Math.min(idx * 20, 350)}ms` }}
+            >
               <span className="feature-name">{formatName(name)}</span>
               <span className={`feature-value${value > 0 ? ' nonzero' : ''}`}>
                 {typeof value === 'number' && !Number.isInteger(value)
@@ -67,8 +104,12 @@ export default function ResultCard({ result }) {
               </span>
             </div>
           ))}
-          {binaryFeatures.map(([name, value]) => (
-            <div key={name} className="feature-item">
+          {binaryFeatures.map(([name, value], idx) => (
+            <div
+              key={name}
+              className="feature-item feature-item-animated"
+              style={{ animationDelay: `${Math.min((numericFeatures.length + idx) * 20, 500)}ms` }}
+            >
               <span className="feature-name">{formatName(name)}</span>
               <span className={`feature-value${value === 1 ? ' nonzero' : ''}`}>
                 {value === 1 ? 'Yes' : 'No'}

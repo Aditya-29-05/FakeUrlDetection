@@ -17,7 +17,7 @@ export default function UrlForm({ onResult, onLoading }) {
     if (err) { setError(err); return; }
     setError('');
     setLoading(true);
-    onLoading(true);
+    onLoading(true, url.trim());
     try {
       const { predictURL } = await import('../services/api.js');
       const result = await predictURL(url.trim());
